@@ -1,0 +1,63 @@
+# Gradle and Kotlin caches/build output
+.gradle/
+.kotlin/
+**/build/
+
+# Local Android SDK and machine configuration
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+captures/
+
+# Native build output
+.externalNativeBuild/
+.cxx/
+
+# Packaged Android artifacts
+*.apk
+*.apks
+*.aab
+*.idsig
+
+# Signing keys and private configuration
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+keystore.properties
+signing.properties
+secrets.properties
+.env
+.env.*
+!.env.example
+google-services.json
+client_secret*.json
+service-account*.json
+
+# Vault data and exports (sensitive even when encrypted)
+*.pnvault
+*.pnpass
+*.pnnote
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*-wal
+*-shm
+*-journal
+
+# Logs, diagnostics, temporary files, and OS metadata
+*.log
+*.hprof
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
