@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -111,7 +112,8 @@ fun VaultScreenContainer(
             .imePadding()
         Column(columnModifier, horizontalAlignment = Alignment.CenterHorizontally) {
             Column(
-                Modifier.fillMaxWidth().width(520.dp).padding(horizontal = VaultSpacing.lg, vertical = VaultSpacing.xl),
+                Modifier.widthIn(max = 520.dp).fillMaxWidth()
+                    .padding(horizontal = VaultSpacing.lg, vertical = VaultSpacing.xl),
                 verticalArrangement = Arrangement.spacedBy(VaultSpacing.xl),
                 content = content,
             )

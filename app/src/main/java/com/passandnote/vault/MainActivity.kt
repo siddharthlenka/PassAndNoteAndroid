@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.passandnote.vault.ui.screens.BeforeYouContinueScreen
 import com.passandnote.vault.ui.screens.OnboardingFlow
 import com.passandnote.vault.ui.screens.PrivacyShield
 import com.passandnote.vault.ui.screens.UnlockScreen
@@ -72,6 +73,7 @@ private fun PassNoteVaultApp(state: VaultAppState) {
     }
     Box(Modifier.fillMaxSize()) {
         when (state.rootMode) {
+            RootMode.BEFORE_CONTINUE -> BeforeYouContinueScreen(state::acceptTerms)
             RootMode.ONBOARDING -> OnboardingFlow(state)
             RootMode.LOCKED -> UnlockScreen(state)
             RootMode.UNLOCKED -> VaultContent(state)

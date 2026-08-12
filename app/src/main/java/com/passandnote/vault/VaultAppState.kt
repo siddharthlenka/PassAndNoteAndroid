@@ -28,7 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.crypto.Cipher
 
-enum class RootMode { ONBOARDING, LOCKED, UNLOCKED }
+enum class RootMode { BEFORE_CONTINUE, ONBOARDING, LOCKED, UNLOCKED }
 enum class OnboardingRoute { WELCOME, CREATE_PASSWORD, REVIEW }
 
 sealed interface VaultDestination {
@@ -50,7 +50,7 @@ class VaultAppState(
     val database = VaultDatabase(context)
     val biometricService = BiometricVaultKeyService(context, metadata)
     val clipboard = SecureClipboard(context, metadata)
-    var rootMode by mutableStateOf(if (metadata.hasCreatedVault) RootMode.LOCKED else RootMode.ONBOARDING)
+    var rootMode by mutableStateOf(initialRootMode(metadata.hasAcceptedCurrentTerms, metadata.hasCreatedVault))
         private set
     var onboardingRoute by mutableStateOf(OnboardingRoute.WELCOME)
     var unlockSuccessMessage by mutableStateOf<String?>(null)
@@ -79,6 +79,13 @@ class VaultAppState(
     fun back(): Boolean {
         if (destinations.size <= 1) return false
         destinations.removeAt(destinations.lastIndex)
+        return true
+    }
+
+    fun acceptTerms(): Boolean {
+        if (!metadata.acceptCurrentTerms()) return false
+        onboardingRoute = OnboardingRoute.WELCOME
+        rootMode = if (metadata.hasCreatedVault) RootMode.LOCKED else RootMode.ONBOARDING
         return true
     }
 

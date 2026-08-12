@@ -2,6 +2,9 @@ package com.passandnote.vault.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,15 +12,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.RestartAlt
@@ -36,6 +46,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,6 +84,206 @@ import com.passandnote.vault.ui.theme.VaultCard
 import com.passandnote.vault.ui.theme.VaultPrimaryText
 import com.passandnote.vault.ui.theme.VaultSecondaryText
 import kotlinx.coroutines.launch
+
+private const val PRIVACY_POLICY_URL = "https://passandnote.com/privacy"
+private const val TERMS_AND_CONDITIONS_URL = "https://passandnote.com/terms"
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun BeforeYouContinueScreen(onContinue: () -> Boolean) {
+    val uriHandler = LocalUriHandler.current
+    var linkError by remember { mutableStateOf<String?>(null) }
+    var acceptanceError by remember { mutableStateOf<String?>(null) }
+
+    fun openLegalPage(url: String) {
+        runCatching { uriHandler.openUri(url) }
+            .onSuccess { linkError = null }
+            .onFailure { linkError = "A browser could not be opened on this device." }
+    }
+
+    VaultScreenContainer(modifier = Modifier.statusBarsPadding()) {
+        SectionHeader(
+            "Before You Continue",
+            "Review and accept the app terms before creating or restoring your vault.",
+        )
+
+        Column(
+            Modifier.fillMaxWidth()
+                .background(VaultCard, RoundedCornerShape(VaultRadius.md))
+                .padding(VaultSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(VaultSpacing.md),
+        ) {
+            AcknowledgementRow(
+                icon = AcknowledgementIcon.LOCAL_VAULT,
+                title = "Local vault",
+                message = "Pass&Note Vault stores your vault locally on this device and does not require an online account.",
+            )
+            AcknowledgementRow(
+                icon = AcknowledgementIcon.MASTER_PASSWORD,
+                title = "Master Password",
+                message = "Your Master Password protects access to your vault and encrypted backup files.",
+            )
+            AcknowledgementRow(
+                icon = AcknowledgementIcon.ENCRYPTED_BACKUP,
+                title = "Encrypted backup",
+                message = "You can create encrypted backups and keep them wherever you prefer.",
+            )
+            AcknowledgementRow(
+                icon = AcknowledgementIcon.PRIVACY_AND_TERMS,
+                title = "Privacy and terms",
+                message = "Continuing means you agree to the Privacy Policy and Terms & Conditions.",
+            )
+        }
+
+        Column(
+            Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(VaultSpacing.sm),
+        ) {
+            Text(
+                "By continuing, you agree to the Privacy Policy and Terms & Conditions.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = VaultSecondaryText,
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(VaultSpacing.md),
+                verticalArrangement = Arrangement.spacedBy(VaultSpacing.xs),
+            ) {
+                TextButton(
+                    onClick = { openLegalPage(PRIVACY_POLICY_URL) },
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                ) {
+                    Text(
+                        "Privacy Policy",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = VaultAccent,
+                    )
+                }
+                TextButton(
+                    onClick = { openLegalPage(TERMS_AND_CONDITIONS_URL) },
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                ) {
+                    Text(
+                        "Terms & Conditions",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = VaultAccent,
+                    )
+                }
+            }
+        }
+
+        if (linkError != null || acceptanceError != null) {
+            Column(
+                Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+                verticalArrangement = Arrangement.spacedBy(VaultSpacing.md),
+            ) {
+                linkError?.let { InfoCard(InfoCardKind.WARNING, "Unable to open link", it) }
+                acceptanceError?.let { InfoCard(InfoCardKind.WARNING, "Could not continue", it) }
+            }
+        }
+        AppButton(
+            "Continue",
+            {
+                acceptanceError = if (onContinue()) null
+                else "Your acceptance could not be saved. Please try again."
+            },
+            icon = Icons.Rounded.CheckCircle,
+        )
+    }
+}
+
+private enum class AcknowledgementIcon {
+    LOCAL_VAULT,
+    MASTER_PASSWORD,
+    ENCRYPTED_BACKUP,
+    PRIVACY_AND_TERMS,
+}
+
+@Composable
+private fun AcknowledgementRow(icon: AcknowledgementIcon, title: String, message: String) {
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(VaultSpacing.md),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Box(Modifier.width(24.dp).height(24.dp), contentAlignment = Alignment.TopCenter) {
+            when (icon) {
+                AcknowledgementIcon.LOCAL_VAULT -> {
+                    Icon(Icons.Outlined.Shield, null, tint = VaultAccent, modifier = Modifier.size(24.dp))
+                    Icon(
+                        Icons.Rounded.Lock,
+                        null,
+                        tint = VaultAccent,
+                        modifier = Modifier.align(Alignment.Center).size(9.dp),
+                    )
+                }
+                AcknowledgementIcon.MASTER_PASSWORD ->
+                    Icon(Icons.Rounded.Key, null, tint = VaultAccent, modifier = Modifier.size(22.dp))
+                AcknowledgementIcon.ENCRYPTED_BACKUP -> EncryptedBackupIcon()
+                AcknowledgementIcon.PRIVACY_AND_TERMS ->
+                    Icon(Icons.Rounded.Description, null, tint = VaultAccent, modifier = Modifier.size(22.dp))
+            }
+        }
+        Column(
+            Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = VaultPrimaryText,
+            )
+            Text(message, style = MaterialTheme.typography.labelMedium, color = VaultSecondaryText)
+        }
+    }
+}
+
+@Composable
+private fun EncryptedBackupIcon() {
+    Canvas(Modifier.size(24.dp)) {
+        val lineWidth = 1.8.dp.toPx()
+        val outline = Stroke(width = lineWidth, cap = StrokeCap.Round, join = StrokeJoin.Round)
+        val drive = Path().apply {
+            moveTo(size.width * 0.27f, size.height * 0.24f)
+            lineTo(size.width * 0.77f, size.height * 0.24f)
+            quadraticTo(size.width * 0.84f, size.height * 0.24f, size.width * 0.87f, size.height * 0.32f)
+            lineTo(size.width * 0.95f, size.height * 0.64f)
+            quadraticTo(size.width * 0.97f, size.height * 0.72f, size.width * 0.88f, size.height * 0.72f)
+            lineTo(size.width * 0.17f, size.height * 0.72f)
+            lineTo(size.width * 0.25f, size.height * 0.32f)
+            quadraticTo(size.width * 0.26f, size.height * 0.27f, size.width * 0.27f, size.height * 0.24f)
+        }
+        drawPath(drive, color = VaultAccent, style = outline)
+        drawLine(
+            color = VaultAccent,
+            start = Offset(size.width * 0.18f, size.height * 0.58f),
+            end = Offset(size.width * 0.92f, size.height * 0.58f),
+            strokeWidth = lineWidth,
+            cap = StrokeCap.Round,
+        )
+
+        val badgeCenter = Offset(size.width * 0.18f, size.height * 0.72f)
+        val badgeRadius = size.minDimension * 0.20f
+        drawCircle(VaultCard, badgeRadius + lineWidth * 0.65f, badgeCenter)
+        drawCircle(VaultAccent, badgeRadius, badgeCenter, style = outline)
+        drawLine(
+            color = VaultAccent,
+            start = Offset(badgeCenter.x - badgeRadius * 0.45f, badgeCenter.y),
+            end = Offset(badgeCenter.x - badgeRadius * 0.10f, badgeCenter.y + badgeRadius * 0.35f),
+            strokeWidth = lineWidth,
+            cap = StrokeCap.Round,
+        )
+        drawLine(
+            color = VaultAccent,
+            start = Offset(badgeCenter.x - badgeRadius * 0.10f, badgeCenter.y + badgeRadius * 0.35f),
+            end = Offset(badgeCenter.x + badgeRadius * 0.52f, badgeCenter.y - badgeRadius * 0.38f),
+            strokeWidth = lineWidth,
+            cap = StrokeCap.Round,
+        )
+    }
+}
 
 @Composable
 fun OnboardingFlow(state: VaultAppState) {

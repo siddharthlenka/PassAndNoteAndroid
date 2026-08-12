@@ -277,6 +277,10 @@ private fun ChangeMasterPasswordDialog(state: VaultAppState, onDismiss: () -> Un
 
 data class AboutSection(val title: String, val body: String)
 
+private const val LEGAL_EFFECTIVE_DATE = "August 12, 2026"
+private const val LEGAL_CONTACT =
+    "Developer/Publisher: Siddharth Lenka\n\nSupport: support@passandnote.com\n\nWebsite: https://passandnote.com"
+
 private val aboutTitles = linkedMapOf(
     "aboutApp" to "About the App",
     "comparison" to "Why Pass&Note Vault",
@@ -372,7 +376,7 @@ private fun aboutSections(page: String): List<AboutSection> = when (page) {
 }
 
 private fun privacySections() = listOf(
-    AboutSection("Effective Date", "[Insert release date]"),
+    AboutSection("Effective Date", LEGAL_EFFECTIVE_DATE),
     AboutSection("Overview", "Pass&Note Vault is designed as a privacy-focused local vault. This Privacy Policy explains how information is handled when you use Pass&Note Vault."),
     AboutSection("Vault Data", "Passwords, secure notes, and related vault information are stored locally in an encrypted database on your device. Pass&Note Vault does not require you to create a Pass&Note Vault online account in order to use the vault. Pass&Note Vault does not intentionally transmit the contents of your vault to developer-operated servers."),
     AboutSection("Master Password", "Pass&Note Vault is designed so that your raw Master Password is not stored directly by the application. Your Master Password is used as part of the cryptographic process that allows access to your encrypted vault. Pass&Note Vault cannot recover a forgotten Master Password."),
@@ -386,11 +390,11 @@ private fun privacySections() = listOf(
     AboutSection("Security", "Pass&Note Vault uses technical safeguards designed to protect locally stored vault information. However, no software, device, storage system, or encryption implementation can guarantee absolute security. Users are responsible for protecting their Master Password, their device, and exported backup files."),
     AboutSection("Children", "Pass&Note Vault is a general-purpose privacy utility and is not specifically designed to collect personal information from children. Because the application does not operate a Pass&Note Vault account service in V1, the developer does not intentionally request personal information from children through an account-registration process."),
     AboutSection("Changes", "This Privacy Policy may be updated when Pass&Note Vault features, data practices, or legal requirements change."),
-    AboutSection("Contact", "Developer/Publisher: Siddharth Lenka\n\nContact: https://passandnote.com"),
+    AboutSection("Contact", LEGAL_CONTACT),
 )
 
 private fun termsSections() = listOf(
-    AboutSection("Effective Date", "[Insert release date]"),
+    AboutSection("Effective Date", LEGAL_EFFECTIVE_DATE),
     AboutSection("Acceptance", "By downloading, installing, or using Pass&Note Vault, you agree to these Terms & Conditions. If you do not agree with these terms, do not use the application."),
     AboutSection("Purpose", "Pass&Note Vault is a software utility designed to allow users to locally store and manage passwords, secure notes, and encrypted backup files."),
     AboutSection("Your Master Password", "You are responsible for creating, remembering, and protecting your Master Password. Pass&Note Vault is designed so that the developer cannot recover a forgotten Master Password. Loss of the Master Password may result in permanent loss of access to encrypted vault data or encrypted backup files."),
@@ -405,7 +409,7 @@ private fun termsSections() = listOf(
     AboutSection("No Warranty", "To the extent permitted by applicable law, Pass&Note Vault is provided on an as available basis without guarantees that the application will always operate without interruption, errors, or data loss."),
     AboutSection("Limitation of Responsibility", "To the extent permitted by applicable law, the developer is not responsible for losses resulting from forgotten Master Passwords, deleted vaults, lost devices, compromised devices, lost or damaged backup files, unencrypted exports, third-party storage providers, or actions taken by users outside the application's control. This section should be reviewed by qualified legal counsel before commercial release."),
     AboutSection("Changes", "These Terms & Conditions may be updated when application functionality, distribution requirements, or applicable law change."),
-    AboutSection("Contact", "Developer/Publisher: Siddharth Lenka\n\nContact: https://passandnote.com"),
+    AboutSection("Contact", LEGAL_CONTACT),
 )
 
 private fun licenseSections() = listOf(

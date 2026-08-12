@@ -2,6 +2,8 @@ package com.passandnote.vault.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.passandnote.vault.CURRENT_TERMS_VERSION
+import com.passandnote.vault.hasAcceptedCurrentTerms
 import kotlin.math.max
 
 class VaultMetadata(context: Context) {
@@ -10,6 +12,12 @@ class VaultMetadata(context: Context) {
     var hasCreatedVault: Boolean
         get() = preferences.getBoolean(HAS_CREATED_VAULT, false)
         set(value) = preferences.edit().putBoolean(HAS_CREATED_VAULT, value).apply()
+
+    val hasAcceptedCurrentTerms: Boolean
+        get() = hasAcceptedCurrentTerms(preferences.getInt(TERMS_ACCEPTED_VERSION, 0))
+
+    fun acceptCurrentTerms(): Boolean =
+        preferences.edit().putInt(TERMS_ACCEPTED_VERSION, CURRENT_TERMS_VERSION).commit()
 
     var vaultHasBeenActivated: Boolean
         get() = if (!activationMetadataInitialized) true else preferences.getBoolean(VAULT_ACTIVATED, false)
@@ -120,6 +128,7 @@ class VaultMetadata(context: Context) {
 
     companion object {
         private const val HAS_CREATED_VAULT = "hasCreatedVault"
+        private const val TERMS_ACCEPTED_VERSION = "termsAcceptedVersion"
         private const val VAULT_ACTIVATED = "vaultHasBeenActivated"
         private const val ACTIVATION_INITIALIZED = "vaultActivationMetadataInitialized"
         private const val BIOMETRIC_ENABLED = "biometricQuickUnlockEnabled"
